@@ -40,6 +40,9 @@ const userDetailsSchema = new mongoose.Schema(
     phone: { type: String, required: true },
     email: { type: String, required: true },
     bio: { type: String, default: "" },
+    divission : { type: String, default: "" },
+    distric : { type: String, default: "" },
+    upozilla : { type: String, default: "" },
     whyWeHireYou: { type: String, default: "" }, // motivation
     role: {
       type: String,

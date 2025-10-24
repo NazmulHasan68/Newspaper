@@ -13,7 +13,7 @@ import organizeRoutes from './routes/post_organized_route.js';
 import catagorySponsorRoutes from './routes/catagory_sponsor_route.js'
 import addTypeRoutes from './routes/ads_route.js'
 import sponsorRoutes from './routes/spnsor_route.js'
-
+import partnerRoutes from './routes/partner_routes.js'
 dotenv.config();
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -41,6 +41,7 @@ app.use("/api/organizes", organizeRoutes);
 app.use("/api/catagory-sponsor", catagorySponsorRoutes);
 app.use("/api/ads-type", addTypeRoutes);
 app.use("/api/sponsor", sponsorRoutes)
+app.use("/api/partner", partnerRoutes)
 
 // Health check
 app.get("/", (req, res) => {

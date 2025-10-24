@@ -113,32 +113,50 @@ export const updateUserDetails = async (req, res) => {
       name,
       email,
       phone,
+      divission,
+      distric,
+      upozilla,
       bio,
       experience,
       skills,
+      role,
       socialLinks,
       paymentAccount, // 💵 Payment updates
       newSponsor,     // 🎯 Optional: add a new sponsor
     } = req.body;
 
     // 1️⃣ Find main user record
-    const userRecord = await User.findById(req.params.id);
-    if (!userRecord)
-      return res.status(404).json({ success: false, message: "User not found" });
+    console.log("id:", req.params.id);
 
-    // 2️⃣ Find UserDetails document
-    const user = await UserDetails.findOne({ userId: userRecord._id });
+   
+  // 2️⃣ Find UserDetails document
+    const user = await UserDetails.findOne({ _id: req.params.id });
     if (!user)
       return res.status(404).json({ success: false, message: "UserDetails not found" });
 
-    // 3️⃣ Handle file uploads
+    // 1️⃣ Find main User record by ObjectId
+    const userRecord = await User.findById(user.userId);
+    if (!userRecord)
+      return res.status(404).json({ success: false, message: "User not found !!" });
+
+
+
+    // 3️⃣ Handle file uploads (photo & CV)
     const photo = req.files?.photo?.[0];
     const cv = req.files?.CV?.[0];
 
     if (photo && user.photo) deleteFile(user.photo);
     if (cv && user.CV) deleteFile(user.CV);
 
-    // 4️⃣ Add new sponsor (if provided)
+    // 4️⃣ If role changed (except reader), update in User model
+    if (role && role !== "reader") {
+      if (!userRecord)
+        return res.status(404).json({ success: false, message: "Main user not found!" });
+        userRecord.role = role;
+        await userRecord.save(); // ✅ Missing in your code
+    }
+
+    // 5️⃣ Add new sponsor (if provided)
     if (newSponsor) {
       const adInfo = AD_PRICES.find((a) => a.name === newSponsor.adType);
       const adPrice = adInfo ? adInfo.price : 0;
@@ -147,7 +165,7 @@ export const updateUserDetails = async (req, res) => {
         sponsorName: newSponsor.sponsorName,
         sponsorEmail: newSponsor.sponsorEmail,
         sponsorPhone: newSponsor.sponsorPhone,
-        adType: newSponsor.adType, // ✅ consistent name
+        adType: newSponsor.adType,
         startDate: newSponsor.startDate || new Date(),
         endDate: newSponsor.endDate || null,
         totalAmount: adPrice,
@@ -158,15 +176,27 @@ export const updateUserDetails = async (req, res) => {
       user.sponsors.push(sponsorToAdd);
     }
 
-    // 5️⃣ Update profile fields
+    // 6️⃣ Update profile fields
     user.set({
       name: name || user.name,
       email: email || user.email,
       phone: phone || user.phone,
       bio: bio || user.bio,
+      role: role || user.role,
+      divission: divission || user.divission,
+      distric: distric || user.distric,
+      upozilla: upozilla || user.upozilla,
       experience: experience || user.experience,
-      skills: skills ? skills.split(",").map((s) => s.trim()) : user.skills,
-      socialLinks: socialLinks ? JSON.parse(socialLinks) : user.socialLinks,
+      skills: skills
+        ? Array.isArray(skills)
+          ? skills
+          : skills.split(",").map((s) => s.trim())
+        : user.skills,
+      socialLinks: socialLinks
+        ? typeof socialLinks === "string"
+          ? JSON.parse(socialLinks)
+          : socialLinks
+        : user.socialLinks,
       photo: photo ? `/uploads/${photo.filename}` : user.photo,
       CV: cv ? `/uploads/${cv.filename}` : user.CV,
       paymentAccount: paymentAccount
@@ -174,6 +204,7 @@ export const updateUserDetails = async (req, res) => {
         : user.paymentAccount,
     });
 
+    // 7️⃣ Save updated document
     await user.save();
 
     res.status(200).json({
