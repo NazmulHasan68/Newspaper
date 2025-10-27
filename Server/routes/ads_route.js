@@ -7,7 +7,13 @@ import {
   deleteAdsTypeAndPostPrice,
 } from "../controllers/ads_type_controlle.js";
 
+
 const router = express.Router();
+
+
+//==============================================================================
+//              finalcinal details
+//==============================================================================
 
 // 🔹 Create a new AdsTypeAndPostPrice
 router.post("/", createAdsTypeAndPostPrice);
@@ -23,5 +29,8 @@ router.put("/:id", updateAdsTypeAndPostPrice);
 
 // 🔹 Delete AdsTypeAndPostPrice by ID
 router.delete("/:id", deleteAdsTypeAndPostPrice);
+
+
+
 
 export default router;

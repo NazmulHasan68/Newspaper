@@ -130,7 +130,7 @@ export const updateUserDetails = async (req, res) => {
 
    
   // 2️⃣ Find UserDetails document
-    const user = await UserDetails.findOne({ _id: req.params.id });
+    const user = await UserDetails.findOne({ userId: req.params.id });
     if (!user)
       return res.status(404).json({ success: false, message: "UserDetails not found" });
 

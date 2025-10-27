@@ -1,4 +1,7 @@
 import { AdsTypeAndPostPrice } from "../models/AdsType.js";
+import { Post } from "../models/post_model.js";
+import { Sponsor } from "../models/sponsor_model.js";
+import { UserDetails } from "../models/userDetails_model.js";
 
 // ✅ Create a new AdsTypeAndPostPrice
 export const createAdsTypeAndPostPrice = async (req, res) => {
@@ -91,3 +94,13 @@ export const deleteAdsTypeAndPostPrice = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+
+//======================================================================================
+//                                      finalshial status 
+//======================================================================================
+
+
+

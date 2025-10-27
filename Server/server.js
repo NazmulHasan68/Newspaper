@@ -14,6 +14,8 @@ import catagorySponsorRoutes from './routes/catagory_sponsor_route.js'
 import addTypeRoutes from './routes/ads_route.js'
 import sponsorRoutes from './routes/spnsor_route.js'
 import partnerRoutes from './routes/partner_routes.js'
+import dashboardRoutes from './routes/dashboard_route.js'
+
 dotenv.config();
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -42,6 +44,7 @@ app.use("/api/catagory-sponsor", catagorySponsorRoutes);
 app.use("/api/ads-type", addTypeRoutes);
 app.use("/api/sponsor", sponsorRoutes)
 app.use("/api/partner", partnerRoutes)
+app.use("/api/dashboard", dashboardRoutes)
 
 // Health check
 app.get("/", (req, res) => {
