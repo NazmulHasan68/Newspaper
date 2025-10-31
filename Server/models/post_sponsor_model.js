@@ -9,11 +9,6 @@ const sponsorSchema = new mongoose.Schema(
       required: true,
     },
 
-    // 👤 Who manages this sponsor
-    sponsorManagedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "UserDetails",
-    },
 
     // 🏢 Sponsor Info
     sponsorName: { type: String, required: true },
@@ -47,5 +42,5 @@ const sponsorSchema = new mongoose.Schema(
 );
 
 // ✅ Export model
-export const Sponsor =
-  mongoose.models.Sponsor || mongoose.model("Sponsor", sponsorSchema);
+export const Postsponsor =
+  mongoose.models.Postsponsor || mongoose.model("Postsponsor", sponsorSchema);

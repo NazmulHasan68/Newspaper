@@ -15,6 +15,7 @@ import addTypeRoutes from './routes/ads_route.js'
 import sponsorRoutes from './routes/spnsor_route.js'
 import partnerRoutes from './routes/partner_routes.js'
 import dashboardRoutes from './routes/dashboard_route.js'
+import postSponsorRoute from './routes/post_sponor_route.js'
 
 dotenv.config();
 const app = express();
@@ -45,6 +46,7 @@ app.use("/api/ads-type", addTypeRoutes);
 app.use("/api/sponsor", sponsorRoutes)
 app.use("/api/partner", partnerRoutes)
 app.use("/api/dashboard", dashboardRoutes)
+app.use("/api/post-sponsor", postSponsorRoute)
 
 // Health check
 app.get("/", (req, res) => {

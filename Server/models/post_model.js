@@ -11,8 +11,8 @@ const postSchema = new mongoose.Schema(
     authorId: { type: mongoose.Schema.Types.ObjectId, ref: "UserDetails", required: true },
     authorName: { type: String },
 
-    title: { type: String, required: true },
-    slug: { type: String, unique: true },
+    title: { type: String,  },
+    slug: { type: String,  },
     summary: { type: String },
     content: { type: String, required: true },
 

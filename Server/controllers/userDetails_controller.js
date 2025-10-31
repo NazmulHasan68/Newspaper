@@ -1,19 +1,8 @@
+import { AdsTypeAndPostPrice } from "../models/AdsType.js";
 import { User } from "../models/authentication_model.js";
 import { Sponsor } from "../models/sponsor_model.js";
 import { UserDetails } from "../models/userDetails_model.js";
 import { deleteFile } from "../services/deleteFileService.js";
-
-
-const AD_PRICES = [
-  { name: "Front Page", price: 2000 },
-  { name: "Second Ads", price: 1500 },
-  { name: "Third Ads", price: 1000 },
-  { name: "Fourth Ads", price: 800 },
-  { name: "Category Ads", price: 1200 },
-  { name: "Product", price: 500 },
-];
-
-
 
 
 // 🧍‍♂️ Create User Details (Writer Profile)
@@ -24,6 +13,9 @@ export const createUserDetails = async (req, res) => {
       phone,
       email,
       bio,
+      divission,
+      distric,
+      upozilla,
       role,
       experience,
       whyWeHireYou,
@@ -56,6 +48,9 @@ export const createUserDetails = async (req, res) => {
       name,
       phone,
       email,
+      distric,
+      upozilla,
+      divission,
       bio,
       role,
       experience,
@@ -113,8 +108,8 @@ export const updateUserDetails = async (req, res) => {
       name,
       email,
       phone,
-      divission,
-      distric,
+      division,
+      district,
       upozilla,
       bio,
       experience,
@@ -125,40 +120,41 @@ export const updateUserDetails = async (req, res) => {
       newSponsor,     // 🎯 Optional: add a new sponsor
     } = req.body;
 
-    // 1️⃣ Find main user record
-    console.log("id:", req.params.id);
+    const userId = req.params.id;
+    console.log("Updating userId:", userId);
 
-   
-  // 2️⃣ Find UserDetails document
-    const user = await UserDetails.findOne({ userId: req.params.id });
+    // 1️⃣ Find UserDetails document
+    const user = await UserDetails.findOne({ userId });
     if (!user)
       return res.status(404).json({ success: false, message: "UserDetails not found" });
 
-    // 1️⃣ Find main User record by ObjectId
+    // 2️⃣ Find main User record
     const userRecord = await User.findById(user.userId);
     if (!userRecord)
-      return res.status(404).json({ success: false, message: "User not found !!" });
+      return res.status(404).json({ success: false, message: "User not found" });
 
-
-
-    // 3️⃣ Handle file uploads (photo & CV)
+    // 3️⃣ Handle file uploads
     const photo = req.files?.photo?.[0];
     const cv = req.files?.CV?.[0];
 
     if (photo && user.photo) deleteFile(user.photo);
     if (cv && user.CV) deleteFile(user.CV);
 
-    // 4️⃣ If role changed (except reader), update in User model
+    // 4️⃣ Update role if changed (except reader)
     if (role && role !== "reader") {
-      if (!userRecord)
-        return res.status(404).json({ success: false, message: "Main user not found!" });
-        userRecord.role = role;
-        await userRecord.save(); // ✅ Missing in your code
+      userRecord.role = role;
+      await userRecord.save();
     }
 
-    // 5️⃣ Add new sponsor (if provided)
+    // 5️⃣ Prepare AD prices for sponsors
+    const results = await AdsTypeAndPostPrice.find();
+    const AD_PRICES = results.flatMap(doc =>
+      doc.adsTypes.map(item => ({ name: item.adsType, price: item.price }))
+    );
+
+    // 6️⃣ Add new sponsor if provided
     if (newSponsor) {
-      const adInfo = AD_PRICES.find((a) => a.name === newSponsor.adType);
+      const adInfo = AD_PRICES.find(a => a.name === newSponsor.adType);
       const adPrice = adInfo ? adInfo.price : 0;
 
       const sponsorToAdd = {
@@ -166,8 +162,8 @@ export const updateUserDetails = async (req, res) => {
         sponsorEmail: newSponsor.sponsorEmail,
         sponsorPhone: newSponsor.sponsorPhone,
         adType: newSponsor.adType,
-        startDate: newSponsor.startDate || new Date(),
-        endDate: newSponsor.endDate || null,
+        startDate: newSponsor.startDate ? new Date(newSponsor.startDate) : new Date(),
+        endDate: newSponsor.endDate ? new Date(newSponsor.endDate) : null,
         totalAmount: adPrice,
         status: "pending",
       };
@@ -176,21 +172,23 @@ export const updateUserDetails = async (req, res) => {
       user.sponsors.push(sponsorToAdd);
     }
 
-    // 6️⃣ Update profile fields
+    // 7️⃣ Update profile fields
     user.set({
-      name: name || user.name,
-      email: email || user.email,
-      phone: phone || user.phone,
-      bio: bio || user.bio,
-      role: role || user.role,
-      divission: divission || user.divission,
-      distric: distric || user.distric,
-      upozilla: upozilla || user.upozilla,
-      experience: experience || user.experience,
+      name: name ?? user.name,
+      email: email ?? user.email,
+      phone: phone ?? user.phone,
+      bio: bio ?? user.bio,
+      role: role ?? user.role,
+      division: division ?? user.division,
+      district: district ?? user.district,
+      upozilla: upozilla ?? user.upozilla,
+      experience: experience ?? user.experience,
       skills: skills
         ? Array.isArray(skills)
           ? skills
-          : skills.split(",").map((s) => s.trim())
+          : typeof skills === "string"
+            ? JSON.parse(skills)
+            : skills.split(",").map(s => s.trim())
         : user.skills,
       socialLinks: socialLinks
         ? typeof socialLinks === "string"
@@ -204,7 +202,7 @@ export const updateUserDetails = async (req, res) => {
         : user.paymentAccount,
     });
 
-    // 7️⃣ Save updated document
+    // 8️⃣ Save updated document
     await user.save();
 
     res.status(200).json({
@@ -212,11 +210,13 @@ export const updateUserDetails = async (req, res) => {
       message: "✅ User updated successfully",
       data: user,
     });
+
   } catch (error) {
     console.error("❌ Update Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 
 
@@ -339,6 +339,7 @@ export const updateSponsorStatus = async (req, res) => {
     console.log(id);
     
     let { sponsorId, status } = req.body;
+    
 
     if (!sponsorId || !status) {
       return res.status(400).json({ success: false, message: "Sponsor ID and status are required" });

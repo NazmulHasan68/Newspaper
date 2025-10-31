@@ -1,6 +1,6 @@
 
 import { Post } from "../models/post_model.js";
-import { Sponsor } from "../models/post_sponsor_model.js";
+import { Postsponsor } from "../models/post_sponsor_model.js";
 import { deleteFile } from "../services/deleteFileService.js"; // for banner deletion
 
 // ✅ Create Sponsor for a Post
@@ -12,7 +12,7 @@ export const createSponsor = async (req, res) => {
     const post = await Post.findById(postId);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    const sponsor = await Sponsor.create({
+    const sponsor = await Postsponsor.create({
       sponsorAddedBy: req.id, // userId from auth middleware
       sponsorName,
       sponsorEmail,
@@ -35,9 +35,8 @@ export const createSponsor = async (req, res) => {
 // ✅ Get All Sponsors
 export const getAllSponsors = async (req, res) => {
   try {
-    const sponsors = await Sponsor.find()
-      .populate("sponsorAddedBy", "name email")
-      .populate("sponsorManagedBy", "name email")
+    const sponsors = await Postsponsor.find()
+      .populate("sponsorAddedBy", "name email role")
       .populate("postSponsored.postId", "title slug");
     res.status(200).json(sponsors);
   } catch (error) {
@@ -48,9 +47,8 @@ export const getAllSponsors = async (req, res) => {
 // ✅ Get Single Sponsor
 export const getSponsorById = async (req, res) => {
   try {
-    const sponsor = await Sponsor.findById(req.params.id)
-      .populate("sponsorAddedBy", "name email")
-      .populate("sponsorManagedBy", "name email")
+    const sponsor = await Postsponsor.findOne({ "postSponsored.postId": req.params.id })
+      .populate("sponsorAddedBy", "name email role")
       .populate("postSponsored.postId", "title slug");
 
     if (!sponsor) return res.status(404).json({ message: "Sponsor not found" });
@@ -64,7 +62,7 @@ export const getSponsorById = async (req, res) => {
 // ✅ Update Sponsor (including banner update)
 export const updateSponsor = async (req, res) => {
   try {
-    const sponsor = await Sponsor.findById(req.params.id);
+    const sponsor = await Postsponsor.findById(req.params.id);
     if (!sponsor) return res.status(404).json({ message: "Sponsor not found" });
 
     // Delete old banner if a new one is uploaded
@@ -90,16 +88,20 @@ export const updateSponsor = async (req, res) => {
   }
 };
 
+
+
 // ✅ Delete Sponsor
 export const deleteSponsor = async (req, res) => {
+  console.log(req.params.id);
+  
   try {
-    const sponsor = await Sponsor.findById(req.params.id);
+    const sponsor = await Postsponsor.findById(req.params.id);
     if (!sponsor) return res.status(404).json({ message: "Sponsor not found" });
 
     // Delete banner file if exists
     if (sponsor.postSponsored.banner) await deleteFile(sponsor.postSponsored.banner);
 
-    await Sponsor.findByIdAndDelete(req.params.id);
+    await Postsponsor.findByIdAndDelete(req.params.id); // <-- corrected
     res.status(200).json({ message: "Sponsor deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
