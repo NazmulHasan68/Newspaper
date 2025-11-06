@@ -16,6 +16,7 @@ import sponsorRoutes from './routes/spnsor_route.js'
 import partnerRoutes from './routes/partner_routes.js'
 import dashboardRoutes from './routes/dashboard_route.js'
 import postSponsorRoute from './routes/post_sponor_route.js'
+import bannerRoute from './routes/banner_route.js'
 
 dotenv.config();
 const app = express();
@@ -47,6 +48,7 @@ app.use("/api/sponsor", sponsorRoutes)
 app.use("/api/partner", partnerRoutes)
 app.use("/api/dashboard", dashboardRoutes)
 app.use("/api/post-sponsor", postSponsorRoute)
+app.use("/api/banners", bannerRoute)
 
 // Health check
 app.get("/", (req, res) => {

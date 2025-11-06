@@ -66,18 +66,21 @@ export const getSponsorById = async (req, res) => {
 
 
 
-// ✅ Update Sponsor
+// ✅ Update Sponsor Controller
 export const updateSponsor = async (req, res) => {
   try {
     const sponsor = await Sponsor.findById(req.params.id);
     if (!sponsor) return res.status(404).json({ message: "Sponsor not found" });
 
-    // Delete previous photo if new uploaded
-    if (req.files?.photo?.[0] && sponsor.sponsoredPost?.photo) {
-      await deleteFile(sponsor.sponsoredPost.photo);
-      req.body.sponsoredPost.photo = `/uploads/${req.files.photo[0].filename}`;
+    // ✅ যদি নতুন ছবি আপলোড হয়
+    if (req.file) {
+      if (sponsor.sponsoredPost?.photo) {
+        await deleteFile(sponsor.sponsoredPost.photo);
+      }
+      sponsor.sponsoredPost.photo = `/uploads/${req.file.filename}`;
     }
 
+    // ✅ বাকী ডেটা আপডেট করো
     sponsor.set(req.body);
     await sponsor.save();
 
@@ -86,6 +89,9 @@ export const updateSponsor = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
 
 
 // ✅ Delete Sponsor
