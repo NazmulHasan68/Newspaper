@@ -124,9 +124,9 @@ export const updateUserDetails = async (req, res) => {
     console.log("Updating userId:", userId);
 
     // 1️⃣ Find UserDetails document
-    const user = await UserDetails.findOne({ userId });
+    const user = await UserDetails.findOne({ _id:userId });
     if (!user)
-      return res.status(404).json({ success: false, message: "UserDetails not found" });
+      return res.status(404).json({ success: false, message: "User Details not found" });
 
     // 2️⃣ Find main User record
     const userRecord = await User.findById(user.userId);
